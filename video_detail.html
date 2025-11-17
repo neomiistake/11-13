@@ -1,0 +1,61 @@
+<!-- video_detail.html (最終版 - 儀表板佈局) -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行程詳情</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="detail-container">
+        <a href="index.html" class="back-link">← 返回影片列表</a>
+
+        <div id="loadingMessage"><h1>正在載入行程詳情...</h1></div>
+        <div id="errorMessage" style="display: none;"></div>
+
+        <!-- 主內容區塊，預設隱藏 -->
+        <div id="videoContent" style="display: none;">
+
+            <header class="detail-header fade-in-up">
+                <h1 id="videoDetailTitle"></h1>
+                <p id="videoDetailDate"></p>
+                <p id="videoDetailDescription"></p>
+            </header>
+
+            <!-- 上半部分：核心視覺區 (影片 + 地圖) -->
+            <div class="dashboard-grid-top">
+                <div class="grid-item video-player-container fade-in-up" style="animation-delay: 0.1s;">
+                    <h3>行車錄影</h3>
+                    <div class="video-player-large" id="videoDetailPlayerWrapper"></div>
+                </div>
+                <div class="grid-item map-container fade-in-up" style="animation-delay: 0.2s;">
+                    <h3>影片行進路線</h3>
+                    <div id="mapContainer" class="map-placeholder">地圖載入中...</div>
+                </div>
+            </div>
+
+            <!-- 下半部分：數據分析區 (AI 報告 + 新圖表) -->
+            <div class="dashboard-grid-bottom">
+                <div class="grid-item ai-report-container fade-in-up" style="animation-delay: 0.3s;">
+                    <h3>AI 智能報告</h3>
+                    <div id="aiReportArea"><p>AI 報告載入中...</p></div>
+                </div>
+                <div class="grid-item chart-container fade-in-up" style="animation-delay: 0.4s;">
+                    <h3>行程數據分析</h3>
+                    <div id="chartContainer">
+                        <canvas id="gpsAccuracyChart"></canvas>
+                        <p id="chartPlaceholder" style="display: none; text-align: center; padding: 20px; color: #777;">此行程無 GPS 數據可供分析。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoLMV1zr1OZIgzJs5E2KhvhH0p3kN5-3k&callback=initVideoDetailPageMap&v=weekly"></script>
+    <!-- 引入 Chart.js 函式庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="video_detail.js"></script>
+</body>
+</html>

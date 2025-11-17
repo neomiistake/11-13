@@ -1,0 +1,82 @@
+<!-- index.html (最終版) -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIoT 智慧安全帽 - 行程管理</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <header class="main-header">
+                <h1>AIoT 智慧安全帽 - 行程管理中心</h1>
+                <nav>
+                    <a href="index.html" class="active">歷史行程</a>
+                    <!-- 為未來的即時監控頁面預留連結 -->
+                    <a href="live_view.html" class="active">即時監控</a>
+                </nav>
+            </header>
+
+            <div class="search-container" id="searchArea">
+                <input type="text" id="searchInput" placeholder="搜尋影片標題或描述...">
+                <button id="searchButton">搜尋</button>
+            </div>
+
+            <div class="video-gallery-section">
+                <div class="video-gallery-header">
+                    <h2>我的影片</h2>
+                    <button id="showAddVideoButton" class="btn-add-video" title="手動新增影片">+</button>
+                </div>
+                <div id="videoPlayerArea" class="video-scroll-container">
+                    <p class="placeholder-text">影片載入中...</p>
+                </div>
+            </div>
+
+            <!-- 新增影片表單，預設隱藏，帶有動畫效果 -->
+            <div id="addVideoFormContainer" class="form-container hidden">
+                <h3>新增影片</h3>
+                <form id="addVideoForm">
+                    <div><label for="videoTitle">標題:</label><input type="text" id="videoTitle" name="title" required></div>
+                    <div><label for="videoDate">日期 (MM/DD):</label><input type="text" id="videoDate" name="date" placeholder="例如 05/20"></div>
+                    <div><label for="videoDesc">描述:</label><textarea id="videoDesc" name="description" rows="3"></textarea></div>
+                    <div>
+                        <label for="videoContentType">類型:</label>
+                        <select id="videoContentType" name="content_type">
+                            <option value="local_video">本地影片</option>
+                        </select>
+                    </div>
+                    <div id="localVideoPathGroup">
+                        <label for="videoPath">本地影片路徑 (例: videos/檔名.mp4):</label>
+                        <input type="text" id="videoPath" name="path" placeholder="例如 my_clip.mp4 或 videos/my_clip.mp4" required>
+                    </div>
+
+                    <div class="form-map-section">
+                        <h4>地圖選點 (可選)</h4>
+                        <label for="locationSearchInput">搜索地點或直接在地圖上點擊:</label>
+                        <input type="text" id="locationSearchInput" placeholder="輸入地址或地標...">
+                        <div id="addVideoMap" class="map-placeholder">地圖載入中...</div>
+                        <input type="hidden" id="selectedLat" name="lat_map_selected">
+                        <input type="hidden" id="selectedLng" name="lng_map_selected">
+                        <div><small>地圖選點: 緯度 <span id="displayLat">未選擇</span>, 經度 <span id="displayLng">未選擇</span></small></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit-form">儲存影片</button>
+                        <button type="button" id="cancelAddVideoButton" class="btn-cancel-form">取消</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="ai-response-section">
+                <h3>系統訊息</h3>
+                <textarea id="aiResponseTextArea" rows="4" readonly placeholder="操作訊息和系統提示會顯示在這裡..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoLMV1zr1OZIgzJs5E2KhvhH0p3kN5-3k&callback=initAppMaps&libraries=places&v=weekly"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!-- live_view.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIoT 智慧安全帽 - 即時監控</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <header class="main-header">
+                <h1>AIoT 智慧安全帽 - 即時監控中心</h1>
+                <nav>
+                    <a href="index.html">歷史行程</a>
+                    <a href="live_view.html" class="active">即時監控</a>
+                </nav>
+            </header>
+
+            <div class="live-grid-container">
+                <!-- Camera 0 -->
+                <div class="live-item fade-in-up">
+                    <h3>鏡頭 CAM 0</h3>
+                    <div class="video-live-wrapper">
+                        <video id="video-cam0" autoplay muted playsinline></video>
+                        <div id="status-cam0" class="status-overlay">正在連接...</div>
+                    </div>
+                </div>
+
+                <!-- Camera 1 -->
+                <div class="live-item fade-in-up" style="animation-delay: 0.1s;">
+                    <h3>鏡頭 CAM 1</h3>
+                    <div class="video-live-wrapper">
+                        <video id="video-cam1" autoplay muted playsinline></video>
+                        <div id="status-cam1" class="status-overlay">正在連接...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="live_view.js"></script>
+</body>
+</html>
