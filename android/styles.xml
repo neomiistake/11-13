@@ -1,0 +1,7 @@
+<!-- res/values/styles.xml -->
+<resources>
+    <style name="Theme.Webweb" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- 自訂顏色、字型等 -->
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
+</resources>
