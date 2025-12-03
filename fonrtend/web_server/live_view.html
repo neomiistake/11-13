@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIoT 智慧監控中心</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .live-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            min-height: calc(100vh - 140px);
+        }
+        @media (max-width: 992px) {
+            .live-layout { grid-template-columns: 1fr; }
+        }
+        /* 側邊欄樣式 */
+        .dashboard-panel {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .panel-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        /* 日誌列表 */
+        .alert-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #fff;
+            min-height: 200px;
+            max-height: 600px; /* 限制高度 */
+        }
+        .alert-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #dc3545;
+            background: #fff5f5;
+            border-radius: 4px;
+            font-size: 0.9em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .alert-time { font-size: 0.8em; color: #888; display: block; margin-bottom: 4px; }
+        .alert-msg { color: #333; font-weight: 600; line-height: 1.4; }
+        
+        /* 狀態卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 15px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-val { font-size: 1.4em; font-weight: bold; color: var(--primary-color); display: block; }
+        .stat-label { font-size: 0.8em; color: #666; }
+        
+        /* 狀態燈號 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .status-online { background: #d4edda; color: #155724; }
+        .status-recording { background: #f8d7da; color: #721c24; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* 影片上的狀態標籤 */
+        .overlay-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .tech-badge {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-green { background-color: #28a745; box-shadow: 0 0 5px #28a745; }
+        .dot-yellow { background-color: #ffc107; }
+        .dot-red { background-color: #dc3545; }
+        .dot-blue { background-color: #007bff; animation: pulse 1s infinite; }
+        
+        .ai-badge { display: none; border: 1px solid rgba(0, 123, 255, 0.5); }
+        .ai-active .ai-badge { display: flex; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1400px;">
+        <div class="main-content">
+            <header class="main-header">
+                <h1>AIoT 智慧安全帽 - 監控中心</h1>
+                <nav>
+                    <a href="index.html">歷史行程</a>
+                    <a href="live_view.html" class="active">即時監控</a>
+                </nav>
+            </header>
+
+            <div class="live-layout">
+                <!-- 左側：儀表板面板 -->
+                <aside class="dashboard-panel">
+                    <!-- 時鐘 -->
+                    <div style="padding: 15px; background: #fff; border-bottom: 1px solid #eee;">
+                        <div class="live-clock-card">
+                            <div id="liveTime" class="live-time">00:00:00</div>
+                            <div id="liveDate" class="live-date">YYYY-MM-DD</div>
+                        </div>
+                    </div>
+
+                    <div class="panel-header">
+                        <span>系統狀態</span>
+                        <span id="systemStatusBadge" class="status-badge status-online">待機中</span>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-val" id="videoCount">-</span>
+                            <span class="stat-label">已存影片</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-val" id="alertCount">0</span>
+                            <span class="stat-label">今日警報</span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 15px; border-bottom: 1px solid #eee; background: #fff;">
+                        <small style="color:#888; display:block; margin-bottom:4px;">Current Trip ID:</small>
+                        <div id="currentTripId" style="font-family: monospace; font-weight: bold; color: #555;">等待連線...</div>
+                    </div>
+
+                    <div class="panel-header" style="background: #fff; border-top: 1px solid #eee;">
+                        <span>即時危險日誌</span>
+                        <small style="color: #dc3545; font-weight: bold; display: flex; align-items: center; gap: 4px;">
+                            <span style="display:block; width:8px; height:8px; background:red; border-radius:50%; animation: pulse 1s infinite;"></span>
+                            LIVE
+                        </small>
+                    </div>
+                    <div id="alertLogArea" class="alert-list">
+                        <div style="text-align: center; color: #999; padding: 20px;">尚無危險警報</div>
+                    </div>
+                </aside>
+
+                <!-- 右側：主監控區 -->
+                <div class="main-monitor-area" style="display: flex; flex-direction: column;">
+                    <!-- 上半部：影像網格 -->
+                    <div class="live-grid-container" style="margin-top: 0;">
+                        <!-- Camera 0 -->
+                        <div class="live-item fade-in-up">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <h3>鏡頭 CAM 0</h3>
+                                <span style="font-size: 0.8em; background: #333; color: #fff; padding: 2px 6px; border-radius: 4px;">LIVE</span>
+                            </div>
+                            <div class="video-live-wrapper" id="wrapper-cam0">
+                                <div class="overlay-badges" id="badges-cam0">
+                                    <div class="tech-badge">
+                                        <span id="dot-cam0" class="dot dot-yellow"></span>
+                                        <span id="text-cam0">連接中...</span>
+                                    </div>
+                                    <div class="tech-badge ai-badge">
+                                        <span class="dot dot-blue"></span>
+                                        <span>AI 運算中</span>
+                                    </div>
+                                </div>
+                                <video id="video-cam0" autoplay muted playsinline></video>
+                                <div id="status-cam0" class="status-overlay">正在連接 WebRTC...</div>
+                                <div class="video-controls">
+                                    <button class="control-btn" onclick="takeSnapshot('cam0')">📸 截圖</button>
+                                    <button class="control-btn" onclick="toggleFullscreen('wrapper-cam0')">⛶ 全螢幕</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Camera 1 -->
+                        <div class="live-item fade-in-up" style="animation-delay: 0.1s;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <h3>鏡頭 CAM 1</h3>
+                                <span style="font-size: 0.8em; background: #333; color: #fff; padding: 2px 6px; border-radius: 4px;">LIVE</span>
+                            </div>
+                            <div class="video-live-wrapper" id="wrapper-cam1">
+                                <div class="overlay-badges" id="badges-cam1">
+                                    <div class="tech-badge">
+                                        <span id="dot-cam1" class="dot dot-yellow"></span>
+                                        <span id="text-cam1">連接中...</span>
+                                    </div>
+                                    <div class="tech-badge ai-badge">
+                                        <span class="dot dot-blue"></span>
+                                        <span>AI 運算中</span>
+                                    </div>
+                                </div>
+                                <video id="video-cam1" autoplay muted playsinline></video>
+                                <div id="status-cam1" class="status-overlay">正在連接 WebRTC...</div>
+                                <div class="video-controls">
+                                    <button class="control-btn" onclick="takeSnapshot('cam1')">📸 截圖</button>
+                                    <button class="control-btn" onclick="toggleFullscreen('wrapper-cam1')">⛶ 全螢幕</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 【新增】底部實用儀表板 -->
+                    <div class="live-bottom-grid fade-in-up" style="animation-delay: 0.2s;">
+                        
+                        <!-- 1. 即時危險指數圖表 -->
+                        <div class="monitor-card" style="flex: 2;">
+                            <h3>📈 即時危險趨勢監控 <small style="color:#aaa; font-size:0.7em;">Live Danger Index</small></h3>
+                            <div class="chart-wrapper">
+                                <canvas id="dangerChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- 2. 最近一次危險快照 -->
+                        <div class="monitor-card" style="flex: 1;">
+                            <h3>📸 最近警報快照 <small style="color:#dc3545; font-size:0.7em;">Last Incident</small></h3>
+                            <div id="lastSnapshotArea" style="flex:1; background:#000; border-radius:4px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;">
+                                <span style="color:#666; font-size:0.9em;">等待警報觸發...</span>
+                                <!-- 圖片會自動插入在這裡 -->
+                            </div>
+                            <div id="lastSnapshotTime" style="margin-top:5px; font-size:0.8em; color:#666; text-align:right;">--:--:--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="live_view.js"></script>
+</body>
+</html>
