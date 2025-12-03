@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行程詳情</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #mapContainer {
+            height: 100%;
+            min-height: 350px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .chart-inner-wrapper { flex-direction: column !important; }
+            .chart-inner-wrapper > div { min-height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="detail-container">
+        <a href="index.html" class="back-link">← 返回影片列表</a>
+
+        <div id="loadingMessage"><h1>正在載入行程詳情...</h1></div>
+        <div id="errorMessage" style="display: none;" class="error-text"></div>
+
+        <!-- 主內容區塊 -->
+        <div id="videoContent" style="display: none;">
+
+            <header class="detail-header fade-in-up">
+                <h1 id="videoDetailTitle"></h1>
+                <p id="videoDetailDate" style="color: #888;"></p>
+                <p id="videoDetailDescription"></p>
+            </header>
+
+            <!-- 【新增功能】數據概覽卡片列 -->
+            <div class="stats-summary-bar fade-in-up" style="animation-delay: 0.05s;">
+                <div class="stat-summary-card">
+                    <div class="stat-icon">📏</div>
+                    <div class="stat-info">
+                        <h4>總里程</h4>
+                        <div><span id="statDistance" class="stat-number">0.00</span><span class="stat-unit">km</span></div>
+                    </div>
+                </div>
+                <div class="stat-summary-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-info">
+                        <h4>行駛時間</h4>
+                        <div><span id="statDuration" class="stat-number">0</span><span class="stat-unit">min</span></div>
+                    </div>
+                </div>
+                <div class="stat-summary-card">
+                    <div class="stat-icon">🚀</div>
+                    <div class="stat-info">
+                        <h4>平均速度</h4>
+                        <div><span id="statSpeed" class="stat-number">0.0</span><span class="stat-unit">km/h</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上半部分：核心視覺區 -->
+            <div class="dashboard-grid-top">
+                <div class="grid-item video-player-container fade-in-up" style="animation-delay: 0.1s;">
+                    <h3>行車錄影</h3>
+                    <div class="video-player-large" id="videoDetailPlayerWrapper" style="background: black; display: flex; align-items: center; justify-content: center;"></div>
+                </div>
+                <div class="grid-item map-container fade-in-up" style="animation-delay: 0.2s;">
+                    <h3>影片行進路線</h3>
+                    <div id="mapContainer" class="map-placeholder">地圖載入中...</div>
+                </div>
+            </div>
+
+            <!-- 下半部分：數據分析區 -->
+            <div class="dashboard-grid-bottom">
+                <!-- 左下：AI 報告 -->
+                <div class="grid-item ai-report-container fade-in-up" style="animation-delay: 0.3s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <h3 style="margin:0; border:none; padding:0;">AI 智能報告</h3>
+                        <div class="ai-header-actions">
+                            <button id="downloadReportBtn" class="btn-outline" title="下載報告" style="display:none;">📥 匯出</button>
+                        </div>
+                    </div>
+                    <div id="aiReportArea"><p>AI 報告載入中...</p></div>
+                </div>
+
+                <!-- 右下：圖表區 -->
+                <div class="grid-item chart-container fade-in-up" style="animation-delay: 0.4s; display: flex; flex-direction: column;">
+                    <h3>行程數據分析</h3>
+                    <div class="chart-inner-wrapper" style="display: flex; flex: 1; gap: 15px; min-height: 0;">
+                        <div style="flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <canvas id="scoreChart"></canvas>
+                            <div style="position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                <span id="scoreValue" style="font-size: 2.5rem; font-weight: bold; color: #333;">--</span>
+                                <div id="scoreLabel" style="font-size: 0.9rem; color: #666;">安全評分</div>
+                            </div>
+                        </div>
+                        <div style="flex: 1.5; position: relative;">
+                            <canvas id="gpsAccuracyChart"></canvas>
+                        </div>
+                    </div>
+                    <p id="chartPlaceholder" style="display: none; text-align: center; padding: 20px; color: #777;">此行程無數據可供分析。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initVideoDetailPageMap&v=weekly"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="video_detail.js"></script>
+</body>
+</html>

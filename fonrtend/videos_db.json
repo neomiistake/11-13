@@ -1,0 +1,19 @@
+[
+    {
+        "id": "vid_manual_112401",
+        "trip_id": null,
+        "date": "",
+        "title": "dmeo",
+        "description": "",
+        "content_type": "local_video",
+        "path": "demo",
+        "gps_trace": [],
+        "danger_events": [],
+        "width": 260,
+        "height": 145,
+        "location": {
+            "lat": 25.030812752232,
+            "lng": 121.5601934814453
+        }
+    }
+]

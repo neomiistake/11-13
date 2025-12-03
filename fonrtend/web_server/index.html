@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIoT 智慧安全帽 - 行程管理</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 頁面專屬微調 */
+        .system-log-container {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            margin-top: 20px;
+        }
+        .system-log-header {
+            color: #fff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+        }
+        #aiResponseTextArea {
+            background: transparent;
+            border: none;
+            color: #d4d4d4;
+            width: 100%;
+            resize: none;
+            outline: none;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        /* 滾動條樣式 */
+        #aiResponseTextArea::-webkit-scrollbar { width: 8px; }
+        #aiResponseTextArea::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        #aiResponseTextArea::-webkit-scrollbar-track { background: #1e1e1e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <header class="main-header">
+                <h1>AIoT 智慧安全帽 - 行程管理中心</h1>
+                <nav>
+                    <a href="index.html" class="active">歷史行程</a>
+                    <a href="live_view.html">即時監控</a>
+                </nav>
+            </header>
+
+            <!-- 【新增】生涯數據總覽 -->
+            <div class="stats-summary-bar fade-in-up">
+                <div class="stat-summary-card">
+                    <div class="stat-icon" style="color: #28a745; background-color: rgba(40, 167, 69, 0.1);">🛡️</div>
+                    <div class="stat-info">
+                        <h4>平均安全分</h4>
+                        <div><span id="totalAvgScore" class="stat-number">--</span><span class="stat-unit">分</span></div>
+                    </div>
+                </div>
+                <div class="stat-summary-card">
+                    <div class="stat-icon" style="color: #17a2b8; background-color: rgba(23, 162, 184, 0.1);">🏁</div>
+                    <div class="stat-info">
+                        <h4>總行程數</h4>
+                        <div><span id="totalTrips" class="stat-number">0</span><span class="stat-unit">趟</span></div>
+                    </div>
+                </div>
+                <div class="stat-summary-card">
+                    <div class="stat-icon" style="color: #dc3545; background-color: rgba(220, 53, 69, 0.1);">⚠️</div>
+                    <div class="stat-info">
+                        <h4>累計危險</h4>
+                        <div><span id="totalDangers" class="stat-number">0</span><span class="stat-unit">次</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-container fade-in-up" id="searchArea" style="animation-delay: 0.1s;">
+                <input type="text" id="searchInput" placeholder="🔍 搜尋影片標題、日期或描述...">
+            </div>
+
+            <div class="video-gallery-section fade-in-up" style="animation-delay: 0.2s;">
+                <div class="video-gallery-header">
+                    <h2>我的影片庫</h2>
+                    <button id="showAddVideoButton" class="btn-add-video" title="手動新增影片">+</button>
+                </div>
+                <div id="videoPlayerArea" class="video-scroll-container">
+                    <p class="placeholder-text">影片載入中...</p>
+                </div>
+            </div>
+
+            <!-- 新增影片表單 (保持不變) -->
+            <div id="addVideoFormContainer" class="form-container hidden">
+                <h3>新增影片</h3>
+                <form id="addVideoForm">
+                    <div class="form-actions" style="margin-bottom: 15px;">
+                        <!-- Demo Mode Checkbox 會由 JS 自動插入在這裡 -->
+                    </div>
+                    <div><label for="videoTitle">標題:</label><input type="text" id="videoTitle" name="title" required></div>
+                    <div><label for="videoDate">日期 (MM/DD):</label><input type="text" id="videoDate" name="date" placeholder="例如 05/20"></div>
+                    <div><label for="videoDesc">描述:</label><textarea id="videoDesc" name="description" rows="3"></textarea></div>
+                    <div style="display:none;"> <!-- 隱藏不必要的欄位 -->
+                        <label for="videoContentType">類型:</label>
+                        <select id="videoContentType" name="content_type"><option value="local_video">本地影片</option></select>
+                    </div>
+                    <div id="localVideoPathGroup">
+                        <label for="videoPath">本地影片路徑 (例: videos/檔名.mp4):</label>
+                        <input type="text" id="videoPath" name="path" placeholder="例如 videos/my_clip.mp4" required>
+                    </div>
+
+                    <div class="form-map-section">
+                        <h4>地圖選點 (可選)</h4>
+                        <label for="locationSearchInput">搜索地點或直接在地圖上點擊:</label>
+                        <input type="text" id="locationSearchInput" placeholder="輸入地址或地標...">
+                        <div id="addVideoMap" class="map-placeholder">地圖載入中...</div>
+                        <input type="hidden" id="selectedLat" name="lat_map_selected">
+                        <input type="hidden" id="selectedLng" name="lng_map_selected">
+                        <div><small>地圖選點: 緯度 <span id="displayLat">未選擇</span>, 經度 <span id="displayLng">未選擇</span></small></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit-form">儲存影片</button>
+                        <button type="button" id="cancelAddVideoButton" class="btn-cancel-form">取消</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 【美化】系統終端機風格 -->
+            <div class="system-log-container fade-in-up" style="animation-delay: 0.3s;">
+                <div class="system-log-header">
+                    <span>SYSTEM_LOG</span>
+                    <span>STATUS: ONLINE ●</span>
+                </div>
+                <textarea id="aiResponseTextArea" rows="5" readonly placeholder="系統初始化中..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoLMV1zr1OZIgzJs5E2KhvhH0p3kN5-3k&callback=initAppMaps&libraries=places&v=weekly"></script>
+    <script src="script.js"></script>
+</body>
+</html>
